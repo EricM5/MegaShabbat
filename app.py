@@ -11,9 +11,10 @@ from bs4 import BeautifulSoup
 URL = 'https://www.ticketleap.com/'
 
 
-def check_element_exists(driver, by, value):
-    elements = driver.find_elements(by, value)
+def check_element_exists(driver, value):
+    elements = driver.find_element(By.XPATH, value)
     if elements:
+        print("ELEMENT EXISTS!")
         return True
     else:
         return False
@@ -43,23 +44,35 @@ def login_and_click(url, username, password):
     time.sleep(10)
     html = driver.page_source  # get the HTML of the page
     soup = BeautifulSoup(html, 'html.parser')
-    with open('sample.html', 'w') as file:
-        file.write(html)
-
+    # with open('sample.html', 'w') as file:
+    #     file.write(html)
 
     #loop for every page here.
-        
-
     
     # [indent] Now get the attendees
 
-    attendees_and_tables = []
-    ten_attendees_on_current_page  = soup.find_all("div", class_="list-group")
-    for attendee in ten_attendees_on_current_page:
-        attendee_name = attendee.find('div', class_='TicketsCell-module__tickets-cell__ticket-button-name_HCNTP').text
-        attendee_table_host = attendee.find('div', class_='TicketsCell-module__tickets-cell__block_g094r').text
-        attendees_and_tables.append((attendee_name, attendee_table_host))
 
+    attendees_and_tables = []
+    
+    exists = check_element_exists(driver, "//i[@class='icon-navigate_next']")
+    while exists:        
+        html = driver.page_source  # get the HTML of the page
+        soup = BeautifulSoup(html, 'html.parser')
+        ten_attendees_on_current_page  = soup.find_all("div", class_="list-group")
+        for attendee in ten_attendees_on_current_page:
+            attendee_name = attendee.find('div', class_='TicketsCell-module__tickets-cell__ticket-button-name_HCNTP').text
+            attendee_table_host = attendee.find('div', class_='TicketsCell-module__tickets-cell__block_g094r').text
+            attendees_and_tables.append((attendee_name, attendee_table_host))
+        time.sleep(10)
+        print(attendees_and_tables)
+        exists = check_element_exists(driver, "//i[@class='icon-navigate_next']")
+        if exists:
+            navigate_button = driver.find_element(By.XPATH, "//i[@class='icon-navigate_next']")    
+            navigate_button.click()
+            time.sleep(10)
+        else:
+            break
+        
     print(attendees_and_tables)
 
 
